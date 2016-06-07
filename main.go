@@ -9,8 +9,10 @@ import (
 	"strings"
 )
 
+const gridSize int = 3
+
 type Board struct {
-	tiles [3][3]int
+	tiles [gridSize][gridSize]int
 }
 
 func main() {
@@ -28,8 +30,30 @@ func main() {
 			break
 		}
 
+		playing = !isGameOver(b)
+
 		fmt.Println()
 	}
+}
+
+func isGameOver(b Board) bool {
+	return checkRows(b)
+}
+
+func checkRows(b Board) bool {
+	for i := 0; i < gridSize; i++ {
+		firstCell := b.tiles[i][0]
+
+		if firstCell == 0 {
+			continue
+		}
+
+		if firstCell == b.tiles[i][1] && b.tiles[i][1] == b.tiles[i][2] {
+			return true
+		}
+	}
+
+	return false
 }
 
 func placeMove(b *Board, position []int, mark string) error {
@@ -64,7 +88,7 @@ func readInput(b Board) ([]int, string) {
 func parseInput(input string) ([]int, string, error) {
 	arr := strings.Split(input, ",")
 
-	if len(arr) < 3 {
+	if len(arr) < gridSize {
 		return nil, "", errors.New("Unrecognized input")
 	}
 
@@ -88,7 +112,7 @@ func parseInput(input string) ([]int, string, error) {
 }
 
 func constructInitialBoard() Board {
-	return Board{[3][3]int{
+	return Board{[gridSize][gridSize]int{
 		{0, 0, 0},
 		{0, 0, 0},
 		{0, 0, 0}}}
@@ -96,15 +120,15 @@ func constructInitialBoard() Board {
 
 func printBoard(b Board) {
 	fmt.Println("Here is the current board:")
-	for i := 0; i < 3; i++ {
+	for i := 0; i < gridSize; i++ {
 		fmt.Println()
 		printRow(b.tiles[i])
 	}
 }
 
-func printRow(row [3]int) {
+func printRow(row [gridSize]int) {
 	for i := 0; i < 9; i++ {
-		if i%3 == 0 {
+		if i%gridSize == 0 {
 			fmt.Print("|")
 		}
 
