@@ -48,7 +48,8 @@ func main() {
 			playerTurn = true
 		}
 
-		playing = !isGameOver(b)
+		winningPlayer := getWinningPlayer(b)
+		playing = winningPlayer == ""
 
 		fmt.Println()
 	}
@@ -187,11 +188,26 @@ func decodeValue(value int) string {
 	return ""
 }
 
-func isGameOver(b Board) bool {
-	return checkRows(b) || checkDiagonals(b) || checkColumns(b)
+func getWinningPlayer(b Board) string {
+	rowVictory := getRowVictory(b)
+	diagonalVictory := getDiagonalVictory(b)
+	columnVictory := getColumnVictory(b)
+
+	if rowVictory != "" {
+		fmt.Println(rowVictory + " wins!")
+		return rowVictory
+	} else if columnVictory != "" {
+		fmt.Println(columnVictory + " wins!")
+		return columnVictory
+	} else if diagonalVictory != "" {
+		fmt.Println(diagonalVictory + " wins!")
+		return diagonalVictory
+	}
+
+	return ""
 }
 
-func checkColumns(b Board) bool {
+func getColumnVictory(b Board) string {
 	for i := 0; i < gridSize; i++ {
 		firstCell := b.tiles[0][i]
 
@@ -200,14 +216,14 @@ func checkColumns(b Board) bool {
 		}
 
 		if firstCell == b.tiles[1][i] && b.tiles[1][i] == b.tiles[2][i] {
-			return true
+			return decodeValue(firstCell)
 		}
 	}
 
-	return false
+	return ""
 }
 
-func checkDiagonals(b Board) bool {
+func getDiagonalVictory(b Board) string {
 	topLeft := b.tiles[0][0]
 	topRight := b.tiles[0][2]
 	middle := b.tiles[1][1]
@@ -215,13 +231,19 @@ func checkDiagonals(b Board) bool {
 	bottomRight := b.tiles[2][2]
 
 	if middle == 0 {
-		return false
+		return ""
 	}
 
-	return (topLeft == middle && middle == bottomRight) || (topRight == middle && middle == bottomLeft)
+	if topLeft == middle && middle == bottomRight {
+		return decodeValue(topLeft)
+	} else if topRight == middle && middle == bottomLeft {
+		return decodeValue(topRight)
+	}
+
+	return ""
 }
 
-func checkRows(b Board) bool {
+func getRowVictory(b Board) string {
 	for i := 0; i < gridSize; i++ {
 		firstCell := b.tiles[i][0]
 
@@ -230,9 +252,9 @@ func checkRows(b Board) bool {
 		}
 
 		if firstCell == b.tiles[i][1] && b.tiles[i][1] == b.tiles[i][2] {
-			return true
+			return decodeValue(firstCell)
 		}
 	}
 
-	return false
+	return ""
 }
