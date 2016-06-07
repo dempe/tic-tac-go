@@ -44,7 +44,7 @@ func main() {
 
 			playerTurn = false
 		} else {
-			placeMove(&b, computerMove(b), computerMark)
+			placeMove(&b, computerMove(b, "random"), computerMark)
 			playerTurn = true
 		}
 
@@ -54,8 +54,18 @@ func main() {
 	}
 }
 
-func computerMove(b Board) []int {
+func computerMove(b Board, aiType string) []int {
 	fmt.Println("Computer's turn!")
+
+	switch aiType {
+	case "random":
+		return moveRandomly(b)
+	default:
+		return moveRandomly(b)
+	}
+}
+
+func moveRandomly(b Board) []int {
 	source := rand.NewSource(time.Now().UnixNano())
 	rand := rand.New(source)
 	row := rand.Intn(3)
