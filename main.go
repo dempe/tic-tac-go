@@ -37,7 +37,21 @@ func main() {
 }
 
 func isGameOver(b Board) bool {
-	return checkRows(b)
+	return checkRows(b) || checkDiagonals(b)
+}
+
+func checkDiagonals(b Board) bool {
+	topLeft := b.tiles[0][0]
+	topRight := b.tiles[0][2]
+	middle := b.tiles[1][1]
+	bottomLeft := b.tiles[2][0]
+	bottomRight := b.tiles[2][2]
+
+	if middle == 0 {
+		return false
+	}
+
+	return (topLeft == middle && middle == bottomRight) || (topRight == middle && middle == bottomLeft)
 }
 
 func checkRows(b Board) bool {
