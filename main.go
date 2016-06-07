@@ -1,12 +1,14 @@
-package tictacgo
+package main
 
 import (
 	"bufio"
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const gridSize int = 3
@@ -18,16 +20,32 @@ type Board struct {
 func main() {
 	b := constructInitialBoard()
 	playing := true
+	playerTurn := playerGoesFirst()
+	var computerMark, playerMark string
+
+	if !playerTurn {
+		computerMark = "X"
+		playerMark = "O"
+	} else {
+		computerMark = "O"
+		playerMark = "X"
+	}
 
 	for playing {
-		printBoard(b)
-		position, mark := readInput(b)
+		if playerTurn {
+			fmt.Println("Your turn!")
+			printBoard(b)
+			err := placeMove(&b, readInput(), playerMark)
 
-		err := placeMove(&b, position, mark)
+			if err != nil {
+				fmt.Println(err)
+				break
+			}
 
-		if err != nil {
-			fmt.Println(err)
-			break
+			playerTurn = false
+		} else {
+			placeMove(&b, computerMove(b), computerMark)
+			playerTurn = true
 		}
 
 		playing = !isGameOver(b)
@@ -36,6 +54,25 @@ func main() {
 	}
 }
 
+func computerMove(b Board) []int {
+	fmt.Println("Computer's turn!")
+	source := rand.NewSource(time.Now().UnixNano())
+	rand := rand.New(source)
+	row := rand.Intn(3)
+	col := rand.Intn(3)
+
+	for b.tiles[row][col] != 0 {
+		row = rand.Intn(3)
+		col = rand.Intn(3)
+	}
+
+	return []int{row, col}
+}
+
+func playerGoesFirst() bool {
+	source := rand.NewSource(time.Now().UnixNano())
+	rand := rand.New(source)
+	return rand.Intn(100)%2 == 0
 }
 
 func placeMove(b *Board, position []int, mark string) error {
@@ -53,44 +90,42 @@ func placeMove(b *Board, position []int, mark string) error {
 	return nil
 }
 
-func readInput(b Board) ([]int, string) {
-	fmt.Println("Please input your move in the form:  row,col,type.  Example:  0,2,X")
-	fmt.Println("Rows and columns go from 0 - 2, while types can be one of 'X' or 'O'")
+func readInput() []int {
+	fmt.Println("Please input your move in the form:  row,col.  Example:  0,2")
 
 	input, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	position, mark, err := parseInput(input)
+	position, err := parseInput(input)
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	return position, mark
+	return position
 }
 
-func parseInput(input string) ([]int, string, error) {
+func parseInput(input string) ([]int, error) {
 	arr := strings.Split(input, ",")
 
-	if len(arr) < gridSize {
-		return nil, "", errors.New("Unrecognized input")
+	if len(arr) < 2 {
+		return nil, errors.New("Unrecognized input - not enough values")
 	}
 
 	row, rowErr := strconv.Atoi(arr[0])
-	col, colErr := strconv.Atoi(arr[1])
-	mark := strings.Replace(arr[2], "\n", "", 1)
+	col, colErr := strconv.Atoi(strings.Replace(arr[1], "\n", "", 1))
 
-	if rowErr != nil || colErr != nil {
-		return nil, "", errors.New("Unrecognized input")
+	if rowErr != nil {
+		return nil, rowErr
+	}
+
+	if colErr != nil {
+		return nil, colErr
 	}
 
 	if row < 0 || row > 2 || col < 0 || col > 2 {
-		return nil, "", errors.New("Unrecognized input")
+		return nil, errors.New("Unrecognized input - value must be in range [0, 2]")
 	}
 
-	if mark != "X" && mark != "O" {
-		return nil, "", errors.New("Unrecognized input" + mark)
-	}
-
-	return []int{row, col}, mark, nil
+	return []int{row, col}, nil
 }
 
 func constructInitialBoard() Board {
@@ -132,7 +167,7 @@ func printRow(row [gridSize]int) {
 func decodeValue(value int) string {
 	switch value {
 	case 0:
-		return ""
+		return " "
 	case 1:
 		return "O"
 	case 2:
@@ -140,4 +175,54 @@ func decodeValue(value int) string {
 	}
 
 	return ""
+}
+
+func isGameOver(b Board) bool {
+	return checkRows(b) || checkDiagonals(b) || checkColumns(b)
+}
+
+func checkColumns(b Board) bool {
+	for i := 0; i < gridSize; i++ {
+		firstCell := b.tiles[0][i]
+
+		if firstCell == 0 {
+			continue
+		}
+
+		if firstCell == b.tiles[1][i] && b.tiles[1][i] == b.tiles[2][i] {
+			return true
+		}
+	}
+
+	return false
+}
+
+func checkDiagonals(b Board) bool {
+	topLeft := b.tiles[0][0]
+	topRight := b.tiles[0][2]
+	middle := b.tiles[1][1]
+	bottomLeft := b.tiles[2][0]
+	bottomRight := b.tiles[2][2]
+
+	if middle == 0 {
+		return false
+	}
+
+	return (topLeft == middle && middle == bottomRight) || (topRight == middle && middle == bottomLeft)
+}
+
+func checkRows(b Board) bool {
+	for i := 0; i < gridSize; i++ {
+		firstCell := b.tiles[i][0]
+
+		if firstCell == 0 {
+			continue
+		}
+
+		if firstCell == b.tiles[i][1] && b.tiles[i][1] == b.tiles[i][2] {
+			return true
+		}
+	}
+
+	return false
 }
