@@ -134,11 +134,11 @@ func printRow(row [gridSize]int) {
 
 		switch i {
 		case 1:
-			printPlace(row[0])
+			fmt.Print(decodeValue(row[0]))
 		case 4:
-			printPlace(row[1])
+			fmt.Print(decodeValue(row[1]))
 		case 7:
-			printPlace(row[2])
+			fmt.Print(decodeValue(row[2]))
 		default:
 			fmt.Print(" _ ")
 		}
@@ -147,13 +147,15 @@ func printRow(row [gridSize]int) {
 	fmt.Println("|")
 }
 
-func printPlace(value int) {
+func decodeValue(value int) string {
 	switch value {
 	case 0:
-		fmt.Print("")
+		return ""
 	case 1:
-		fmt.Print("O")
+		return "O"
 	case 2:
-		fmt.Print("X")
+		return "X"
 	}
+
+	return ""
 }
