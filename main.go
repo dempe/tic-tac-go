@@ -18,13 +18,36 @@ func main() {
 	playing := true
 
 	for playing {
-		readInput(b)
 		printBoard(b)
-		playing = false
+		position, mark := readInput(b)
+
+		err := placeMove(&b, position, mark)
+
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+
+		fmt.Println()
 	}
 }
 
-func readInput(b Board) {
+func placeMove(b *Board, position []int, mark string) error {
+	if b.tiles[position[0]][position[1]] != 0 {
+		return errors.New("Position already occupided")
+	}
+
+	switch mark {
+	case "O":
+		b.tiles[position[0]][position[1]] = 1
+	case "X":
+		b.tiles[position[0]][position[1]] = 2
+	}
+
+	return nil
+}
+
+func readInput(b Board) ([]int, string) {
 	fmt.Println("Please input your move in the form:  row,col,type.  Example:  0,2,X")
 	fmt.Println("Rows and columns go from 0 - 2, while types can be one of 'X' or 'O'")
 
@@ -34,6 +57,8 @@ func readInput(b Board) {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	return position, mark
 }
 
 func parseInput(input string) ([]int, string, error) {
