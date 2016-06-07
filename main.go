@@ -7,7 +7,18 @@ type Board struct {
 }
 
 func main() {
-	printBoard(constructInitialBoard())
+	b := constructInitialBoard()
+	playing := true
+
+	for playing {
+		displayPrompt()
+		printBoard(b)
+	}
+}
+
+func displayPrompt() {
+	fmt.Println("Please input your move in the form:  row,col type.  Example:  0,2 X")
+	fmt.Println("Rows and columns go from 0 - 2, while types can be one of 'X' or 'O'")
 }
 
 func constructInitialBoard() Board {
@@ -18,6 +29,7 @@ func constructInitialBoard() Board {
 }
 
 func printBoard(b Board) {
+	fmt.Println("Here is the current board:")
 	for i := 0; i < 3; i++ {
 		fmt.Println()
 		printRow(b.tiles[i])
