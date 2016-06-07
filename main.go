@@ -1,6 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"errors"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
 
 type Board struct {
 	tiles [3][3]int
@@ -11,14 +18,48 @@ func main() {
 	playing := true
 
 	for playing {
-		displayPrompt()
+		readInput(b)
 		printBoard(b)
+		playing = false
 	}
 }
 
-func displayPrompt() {
-	fmt.Println("Please input your move in the form:  row,col type.  Example:  0,2 X")
+func readInput(b Board) {
+	fmt.Println("Please input your move in the form:  row,col,type.  Example:  0,2,X")
 	fmt.Println("Rows and columns go from 0 - 2, while types can be one of 'X' or 'O'")
+
+	input, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	position, mark, err := parseInput(input)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func parseInput(input string) ([]int, string, error) {
+	arr := strings.Split(input, ",")
+
+	if len(arr) < 3 {
+		return nil, "", errors.New("Unrecognized input")
+	}
+
+	row, rowErr := strconv.Atoi(arr[0])
+	col, colErr := strconv.Atoi(arr[1])
+	mark := strings.Replace(arr[2], "\n", "", 1)
+
+	if rowErr != nil || colErr != nil {
+		return nil, "", errors.New("Unrecognized input")
+	}
+
+	if row < 0 || row > 2 || col < 0 || col > 2 {
+		return nil, "", errors.New("Unrecognized input")
+	}
+
+	if mark != "X" && mark != "O" {
+		return nil, "", errors.New("Unrecognized input" + mark)
+	}
+
+	return []int{row, col}, mark, nil
 }
 
 func constructInitialBoard() Board {
