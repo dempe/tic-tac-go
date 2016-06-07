@@ -37,7 +37,23 @@ func main() {
 }
 
 func isGameOver(b Board) bool {
-	return checkRows(b) || checkDiagonals(b)
+	return checkRows(b) || checkDiagonals(b) || checkCols(b)
+}
+
+func checkCols(b Board) bool {
+	for i := 0; i < gridSize; i++ {
+		firstCell := b.tiles[0][i]
+
+		if firstCell == 0 {
+			continue
+		}
+
+		if firstCell == b.tiles[1][i] && b.tiles[1][i] == b.tiles[2][i] {
+			return true
+		}
+	}
+
+	return false
 }
 
 func checkDiagonals(b Board) bool {
