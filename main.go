@@ -48,6 +48,11 @@ func main() {
 		winner := b.GetWinningPlayer()
 		playing = winner.Undetermined
 
+		if !playing {
+			fmt.Printf("%s wins!\n", winner.Mark)
+			break // should be uneccessary...
+		}
+
 		fmt.Println()
 	}
 
