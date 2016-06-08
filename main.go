@@ -45,14 +45,14 @@ func main() {
 			playerTurn = true
 		}
 
-		winningPlayer := b.GetWinningPlayer()
-		playing = winningPlayer == ""
+		winner := b.GetWinningPlayer()
+		playing = winner.Undetermined
 
 		fmt.Println()
 	}
 
 	score, _ := ai.CalculateScore(b, playerMark)
-	fmt.Printf("Player score: %d\n", score.GetScore())
+	fmt.Printf("Player score: %d\n", score.Score)
 }
 
 func playerGoesFirst() bool {

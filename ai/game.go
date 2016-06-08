@@ -7,8 +7,8 @@ import (
 )
 
 type Score struct {
-	score         int
-	notDetermined bool
+	Score         int
+	NotDetermined bool
 }
 
 func CalculateScore(b gamelogic.Board, mark string) (Score, error) {
@@ -18,15 +18,11 @@ func CalculateScore(b gamelogic.Board, mark string) (Score, error) {
 
 	winner := b.GetWinningPlayer()
 
-	if winner == "" {
+	if winner.Undetermined {
 		return Score{0, false}, nil
-	} else if mark == winner {
+	} else if mark == winner.Mark {
 		return Score{1, false}, nil
 	}
 
 	return Score{-1, false}, nil
-}
-
-func (s *Score) GetScore() int {
-	return s.score
 }
