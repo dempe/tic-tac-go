@@ -9,16 +9,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/dempe/tictacgo/gamelogic"
 )
 
-const gridSize int = 3
-
-type Board struct {
-	tiles [gridSize][gridSize]int
-}
-
 func main() {
-	b := constructInitialBoard()
+	b := gamelogic.NewBoard()
 	playing := true
 	playerTurn := playerGoesFirst()
 	var computerMark, playerMark string
@@ -34,8 +30,8 @@ func main() {
 	for playing {
 		if playerTurn {
 			fmt.Println("Your turn!")
-			printBoard(b)
-			err := placeMove(&b, readInput(), playerMark)
+			b.PrintBoard()
+			err := b.PlaceMove(readInput(), playerMark)
 
 			if err != nil {
 				fmt.Println(err)
@@ -44,18 +40,18 @@ func main() {
 
 			playerTurn = false
 		} else {
-			placeMove(&b, computerMove(b, "random"), computerMark)
+			b.PlaceMove(computerMove(b, "random"), computerMark)
 			playerTurn = true
 		}
 
-		winningPlayer := getWinningPlayer(b)
+		winningPlayer := b.GetWinningPlayer()
 		playing = winningPlayer == ""
 
 		fmt.Println()
 	}
 }
 
-func computerMove(b Board, aiType string) []int {
+func computerMove(b gamelogic.Board, aiType string) []int {
 	fmt.Println("Computer's turn!")
 
 	switch aiType {
@@ -66,13 +62,15 @@ func computerMove(b Board, aiType string) []int {
 	}
 }
 
-func moveRandomly(b Board) []int {
+func moveRandomly(b gamelogic.Board) []int {
 	source := rand.NewSource(time.Now().UnixNano())
 	rand := rand.New(source)
 	row := rand.Intn(3)
 	col := rand.Intn(3)
 
-	for b.tiles[row][col] != 0 {
+	tiles := b.GetTiles()
+
+	for tiles[row][col] != 0 {
 		row = rand.Intn(3)
 		col = rand.Intn(3)
 	}
@@ -84,21 +82,6 @@ func playerGoesFirst() bool {
 	source := rand.NewSource(time.Now().UnixNano())
 	rand := rand.New(source)
 	return rand.Intn(100)%2 == 0
-}
-
-func placeMove(b *Board, position []int, mark string) error {
-	if b.tiles[position[0]][position[1]] != 0 {
-		return errors.New("Position already occupided")
-	}
-
-	switch mark {
-	case "O":
-		b.tiles[position[0]][position[1]] = 1
-	case "X":
-		b.tiles[position[0]][position[1]] = 2
-	}
-
-	return nil
 }
 
 func readInput() []int {
@@ -137,124 +120,4 @@ func parseInput(input string) ([]int, error) {
 	}
 
 	return []int{row, col}, nil
-}
-
-func constructInitialBoard() Board {
-	return Board{[gridSize][gridSize]int{
-		{0, 0, 0},
-		{0, 0, 0},
-		{0, 0, 0}}}
-}
-
-func printBoard(b Board) {
-	fmt.Println("Here is the current board:")
-	for i := 0; i < gridSize; i++ {
-		fmt.Println()
-		printRow(b.tiles[i])
-	}
-}
-
-func printRow(row [gridSize]int) {
-	for i := 0; i < 9; i++ {
-		if i%gridSize == 0 {
-			fmt.Print("|")
-		}
-
-		switch i {
-		case 1:
-			fmt.Print(decodeValue(row[0]))
-		case 4:
-			fmt.Print(decodeValue(row[1]))
-		case 7:
-			fmt.Print(decodeValue(row[2]))
-		default:
-			fmt.Print(" _ ")
-		}
-	}
-
-	fmt.Println("|")
-}
-
-func decodeValue(value int) string {
-	switch value {
-	case 0:
-		return " "
-	case 1:
-		return "O"
-	case 2:
-		return "X"
-	}
-
-	return ""
-}
-
-func getWinningPlayer(b Board) string {
-	rowVictory := getRowVictory(b)
-	diagonalVictory := getDiagonalVictory(b)
-	columnVictory := getColumnVictory(b)
-
-	if rowVictory != "" {
-		fmt.Println(rowVictory + " wins!")
-		return rowVictory
-	} else if columnVictory != "" {
-		fmt.Println(columnVictory + " wins!")
-		return columnVictory
-	} else if diagonalVictory != "" {
-		fmt.Println(diagonalVictory + " wins!")
-		return diagonalVictory
-	}
-
-	return ""
-}
-
-func getColumnVictory(b Board) string {
-	for i := 0; i < gridSize; i++ {
-		firstCell := b.tiles[0][i]
-
-		if firstCell == 0 {
-			continue
-		}
-
-		if firstCell == b.tiles[1][i] && b.tiles[1][i] == b.tiles[2][i] {
-			return decodeValue(firstCell)
-		}
-	}
-
-	return ""
-}
-
-func getDiagonalVictory(b Board) string {
-	topLeft := b.tiles[0][0]
-	topRight := b.tiles[0][2]
-	middle := b.tiles[1][1]
-	bottomLeft := b.tiles[2][0]
-	bottomRight := b.tiles[2][2]
-
-	if middle == 0 {
-		return ""
-	}
-
-	if topLeft == middle && middle == bottomRight {
-		return decodeValue(topLeft)
-	} else if topRight == middle && middle == bottomLeft {
-		return decodeValue(topRight)
-	}
-
-	return ""
-}
-
-func getRowVictory(b Board) string {
-	for i := 0; i < gridSize; i++ {
-		firstCell := b.tiles[i][0]
-
-		if firstCell == 0 {
-			continue
-		}
-
-		if firstCell == b.tiles[i][1] && b.tiles[i][1] == b.tiles[i][2] {
-			return decodeValue(firstCell)
-		}
-	}
-
-	return ""
 }
