@@ -50,6 +50,9 @@ func main() {
 
 		fmt.Println()
 	}
+
+	score, _ := ai.CalculateScore(b, playerMark)
+	fmt.Printf("Player score: %d\n", score.GetScore())
 }
 
 func playerGoesFirst() bool {
