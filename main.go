@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dempe/tictacgo/ai"
 	"github.com/dempe/tictacgo/gamelogic"
 )
 
@@ -40,7 +41,7 @@ func main() {
 
 			playerTurn = false
 		} else {
-			b.PlaceMove(computerMove(b, "random"), computerMark)
+			b.PlaceMove(ai.ComputerMove(b, "random"), computerMark)
 			playerTurn = true
 		}
 
@@ -49,33 +50,6 @@ func main() {
 
 		fmt.Println()
 	}
-}
-
-func computerMove(b gamelogic.Board, aiType string) []int {
-	fmt.Println("Computer's turn!")
-
-	switch aiType {
-	case "random":
-		return moveRandomly(b)
-	default:
-		return moveRandomly(b)
-	}
-}
-
-func moveRandomly(b gamelogic.Board) []int {
-	source := rand.NewSource(time.Now().UnixNano())
-	rand := rand.New(source)
-	row := rand.Intn(3)
-	col := rand.Intn(3)
-
-	tiles := b.GetTiles()
-
-	for tiles[row][col] != 0 {
-		row = rand.Intn(3)
-		col = rand.Intn(3)
-	}
-
-	return []int{row, col}
 }
 
 func playerGoesFirst() bool {
