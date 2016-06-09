@@ -71,23 +71,25 @@ func (b *Board) PlaceMove(position []int, mark string) error {
 	return nil
 }
 
-func (b *Board) GetWinningPlayer() Winner {
+func (b *Board) GetWinningPlayer() *Winner {
 	rowVictory := b.getRowVictory()
 	diagonalVictory := b.getDiagonalVictory()
 	columnVictory := b.getColumnVictory()
 
-	if !rowVictory.Undetermined {
+	if rowVictory != nil {
 		return rowVictory
-	} else if !columnVictory.Undetermined {
+	} else if columnVictory != nil {
 		return columnVictory
-	} else if !diagonalVictory.Undetermined {
+	} else if diagonalVictory != nil {
 		return diagonalVictory
+	} else if b.isFilled() {
+		return &Winner{"", false}
 	}
 
-	return Winner{"", true}
+	return &Winner{"", true}
 }
 
-func (b *Board) getColumnVictory() Winner {
+func (b *Board) getColumnVictory() *Winner {
 	for i := 0; i < gridSize; i++ {
 		firstCell := b.tiles[0][i]
 
@@ -96,14 +98,14 @@ func (b *Board) getColumnVictory() Winner {
 		}
 
 		if firstCell == b.tiles[1][i] && b.tiles[1][i] == b.tiles[2][i] {
-			return Winner{DecodeValue(firstCell), false}
+			return &Winner{DecodeValue(firstCell), false}
 		}
 	}
 
-	return Winner{"", true}
+	return &Winner{"", true}
 }
 
-func (b *Board) getDiagonalVictory() Winner {
+func (b *Board) getDiagonalVictory() *Winner {
 	topLeft := b.tiles[0][0]
 	topRight := b.tiles[0][2]
 	middle := b.tiles[1][1]
@@ -111,19 +113,19 @@ func (b *Board) getDiagonalVictory() Winner {
 	bottomRight := b.tiles[2][2]
 
 	if middle == 0 {
-		return Winner{"", true}
+		return &Winner{"", true}
 	}
 
 	if topLeft == middle && middle == bottomRight {
-		return Winner{DecodeValue(topLeft), false}
+		return &Winner{DecodeValue(topLeft), false}
 	} else if topRight == middle && middle == bottomLeft {
-		return Winner{DecodeValue(topRight), false}
+		return &Winner{DecodeValue(topRight), false}
 	}
 
-	return Winner{"", true}
+	return &Winner{"", true}
 }
 
-func (b *Board) getRowVictory() Winner {
+func (b *Board) getRowVictory() *Winner {
 	for i := 0; i < gridSize; i++ {
 		firstCell := b.tiles[i][0]
 
@@ -132,11 +134,23 @@ func (b *Board) getRowVictory() Winner {
 		}
 
 		if firstCell == b.tiles[i][1] && b.tiles[i][1] == b.tiles[i][2] {
-			return Winner{DecodeValue(firstCell), false}
+			return &Winner{DecodeValue(firstCell), false}
 		}
 	}
 
-	return Winner{"", true}
+	return nil
+}
+
+func (b *Board) isFilled() bool {
+	for i := 0; i < gridSize; i++ {
+		for j := 0; j < gridSize; j++ {
+			if b.tiles[i][j] == 0 {
+				return false
+			}
+		}
+	}
+
+	return true
 }
 
 func DecodeValue(value int) string {

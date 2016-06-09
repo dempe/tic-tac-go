@@ -12,6 +12,11 @@ type Score struct {
 	NotDetermined bool
 }
 
+type GameState struct {
+	position  [2]int
+	subStates *list.List
+}
+
 func CalculateScore(b gamelogic.Board, mark string) (Score, error) {
 	if mark != "X" && mark != "O" {
 		return Score{0, true}, fmt.Errorf("Unrecognized mark, %s.  Must be X or O", mark)
