@@ -41,6 +41,7 @@ func main() {
 
 			playerTurn = false
 		} else {
+			//state, _ := ai.NewGameState(b)
 			b.PlaceMove(ai.ComputerMove(b, "random"), computerMark)
 			playerTurn = true
 		}

@@ -88,11 +88,11 @@ func (b *Board) GetWinningPlayer() *Winner {
 	diagonalVictory := b.getDiagonalVictory()
 	columnVictory := b.getColumnVictory()
 
-	if rowVictory != nil {
+	if !rowVictory.Undetermined {
 		return rowVictory
-	} else if columnVictory != nil {
+	} else if !columnVictory.Undetermined {
 		return columnVictory
-	} else if diagonalVictory != nil {
+	} else if !diagonalVictory.Undetermined {
 		return diagonalVictory
 	} else if b.isFilled() {
 		return &Winner{"", false}
@@ -150,7 +150,7 @@ func (b *Board) getRowVictory() *Winner {
 		}
 	}
 
-	return nil
+	return &Winner{"", true}
 }
 
 func (b *Board) isFilled() bool {
