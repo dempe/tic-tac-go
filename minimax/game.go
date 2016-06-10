@@ -1,4 +1,4 @@
-package ai
+package minimax
 
 import (
 	"container/list"
@@ -14,9 +14,14 @@ type Score struct {
 }
 
 type GameState struct {
-	board     gamelogic.Board
+	Board     gamelogic.Board
 	turn      int
 	SubStates *list.List
+}
+
+type GameStateScore struct {
+	Board gamelogic.Board
+	score int
 }
 
 func NewGameState(b gamelogic.Board) (*GameState, error) {
@@ -42,6 +47,70 @@ func NewGameState(b gamelogic.Board) (*GameState, error) {
 	}
 
 	return &GameState{b, turn, subStates}, nil
+}
+
+func (g *GameState) MiniMax(mark string) (GameStateScore, error) {
+	// fmt.Println("Board before!!!")
+	// g.Board.PrintBoard()
+	score, err := g.miniMaxHelper(mark, true)
+	// fmt.Printf("Board after!!! %d points \n", score.score)
+	// score.Board.PrintBoard()
+	return score, err
+}
+
+func (g *GameState) miniMaxHelper(mark string, findHighest bool) (GameStateScore, error) {
+	//fmt.Printf("finding highest:  %t\n", findHighest)
+	if g.SubStates.Len() == 0 {
+		score, _ := CalculateScore(g.Board, mark)
+		return GameStateScore{g.Board, score.Score}, nil
+	}
+
+	var target int
+	var bestState GameStateScore
+
+	if findHighest {
+		target = -1
+	} else {
+		target = 1
+	}
+
+	firstIter := true
+	for e := g.SubStates.Front(); e != nil; e = e.Next() {
+		value, ok := e.Value.(*GameState)
+
+		if !ok {
+			return GameStateScore{g.Board, 0}, errors.New("Expected type GameState")
+		}
+
+		//fmt.Printf("Total substates:  %d\n", value.Sum())
+
+		gameStateScore, err := value.miniMaxHelper(mark, !findHighest)
+		//fmt.Printf("score = %d\n", score)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		// ensure initialization
+		if firstIter {
+			firstIter = false
+			bestState = GameStateScore{value.Board, target}
+		}
+
+		if findHighest {
+			if gameStateScore.score > target {
+				target = gameStateScore.score
+				bestState = GameStateScore{value.Board, target}
+			}
+		} else {
+			if gameStateScore.score < target {
+				target = gameStateScore.score
+				bestState = GameStateScore{value.Board, target}
+			}
+		}
+	}
+
+	return bestState, nil
 }
 
 func (g *GameState) Sum() int {

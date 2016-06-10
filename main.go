@@ -12,6 +12,7 @@ import (
 
 	"github.com/dempe/tictacgo/ai"
 	"github.com/dempe/tictacgo/gamelogic"
+	"github.com/dempe/tictacgo/minimax"
 )
 
 func main() {
@@ -41,8 +42,7 @@ func main() {
 
 			playerTurn = false
 		} else {
-			//state, _ := ai.NewGameState(b)
-			b.PlaceMove(ai.ComputerMove(b, "random"), computerMark)
+			b.PlaceMove(ai.ComputerMove(b, "minimax", computerMark), computerMark)
 			playerTurn = true
 		}
 
@@ -57,7 +57,7 @@ func main() {
 		fmt.Println()
 	}
 
-	score, _ := ai.CalculateScore(b, playerMark)
+	score, _ := minimax.CalculateScore(b, playerMark)
 	fmt.Printf("Player score: %d\n", score.Score)
 }
 

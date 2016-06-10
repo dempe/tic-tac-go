@@ -177,3 +177,27 @@ func DecodeValue(value int) string {
 
 	return ""
 }
+
+func EncodeValue(value string) int {
+	switch value {
+	case " ":
+		return 0
+	case "O":
+		return 1
+	case "X":
+		return 2
+	}
+
+	return 0
+}
+
+func GetOppositeMark(value string) string {
+	switch value {
+	case "X":
+		return "O"
+	case "O":
+		return "X"
+	default:
+		return ""
+	}
+}
