@@ -2,6 +2,7 @@ package ai
 
 import (
 	"container/list"
+	"errors"
 	"fmt"
 
 	"github.com/dempe/tictacgo/gamelogic"
@@ -13,12 +14,36 @@ type Score struct {
 }
 
 type GameState struct {
-	position  [2]int
+	board     gamelogic.Board
+	turn      int
 	subStates *list.List
 }
 
-func whoseTurn(b Board) int {
+func NewGameState(b gamelogic.Board) (*GameState, error) {
+	turn := whoseTurn(b)
+	moves := CalculatePossibleMoves(b)
+	subStates := list.New()
+
+	for e := moves.Front(); e != nil; e = e.Next() {
+		newBoard := b.Copy()
+
+		value, ok := e.Value.([]int)
+
+		if !ok {
+			return nil, errors.New("Expected type []int")
+		}
+
+		b.PlaceMove(value, gamelogic.DecodeValue(turn))
+		subState, _ := NewGameState(*newBoard)
+		subStates.PushBack(subState)
+	}
+
+	return &GameState{b, turn, subStates}, nil
+}
+
+func whoseTurn(b gamelogic.Board) int {
 	var xcount, ycount int
+	tiles := b.GetTiles()
 
 	for i := 0; i < 3; i++ {
 		for j := 0; j < len(tiles[i]); j++ {
@@ -30,6 +55,7 @@ func whoseTurn(b Board) int {
 		}
 	}
 
+	// X always goes first
 	if xcount == ycount {
 		return 2
 	}
@@ -53,11 +79,7 @@ func CalculateScore(b gamelogic.Board, mark string) (Score, error) {
 	return Score{-1, false}, nil
 }
 
-func CalculatePossibleMoves(b gamelogic.Board, mark string) (*list.List, error) {
-	if mark != "X" && mark != "O" {
-		return list.New(), fmt.Errorf("Unrecognized mark, %s.  Must be X or O", mark)
-	}
-
+func CalculatePossibleMoves(b gamelogic.Board) *list.List {
 	positions := list.New()
 	tiles := b.GetTiles()
 
@@ -69,5 +91,5 @@ func CalculatePossibleMoves(b gamelogic.Board, mark string) (*list.List, error) 
 		}
 	}
 
-	return positions, nil
+	return positions
 }

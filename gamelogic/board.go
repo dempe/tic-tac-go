@@ -27,6 +27,18 @@ func (b *Board) GetTiles() [3][3]int {
 	return b.tiles
 }
 
+func (b *Board) Copy() *Board {
+	newBoard := NewBoard()
+
+	for i := 0; i < gridSize; i++ {
+		for j := 0; j < gridSize; j++ {
+			newBoard.tiles[i][j] = b.tiles[i][j]
+		}
+	}
+
+	return &newBoard
+}
+
 func (b *Board) PrintBoard() {
 	fmt.Println("Here is the current board:")
 	for i := 0; i < gridSize; i++ {
