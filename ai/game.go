@@ -17,6 +17,26 @@ type GameState struct {
 	subStates *list.List
 }
 
+func whoseTurn(b Board) int {
+	var xcount, ycount int
+
+	for i := 0; i < 3; i++ {
+		for j := 0; j < len(tiles[i]); j++ {
+			if tiles[i][j] == 1 {
+				ycount++
+			} else if tiles[i][j] == 2 {
+				xcount++
+			}
+		}
+	}
+
+	if xcount == ycount {
+		return 2
+	}
+
+	return 1
+}
+
 func CalculateScore(b gamelogic.Board, mark string) (Score, error) {
 	if mark != "X" && mark != "O" {
 		return Score{0, true}, fmt.Errorf("Unrecognized mark, %s.  Must be X or O", mark)
